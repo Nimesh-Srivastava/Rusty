@@ -1,6 +1,7 @@
 use core::fmt::{Write, Result};
-
+use lazy_static::lazy_static;
 use volatile::Volatile;
+use spin::Mutex;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,6 +54,14 @@ pub struct Writer {
     column_position: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
+}
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::Cyan, Color::Black),
+        buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
+    });
 }
 
 impl Writer {
@@ -115,15 +124,15 @@ impl Write for Writer {
     }
 }
 
-pub fn print_something() {
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
-    };
-
-    writer.write_byte(b'H');
-    writer.write_string("ello ");
-    writer.write_string("Wörld!");
-    write!(writer, "Thr numbers are {} and {}", 42, 1.0/3.0).unwrap();
-}
+//pub fn print_something() {
+//    let mut writer = Writer {
+//        column_position: 0,
+//        color_code: ColorCode::new(Color::Cyan, Color::Black),
+//        buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
+//    };
+//
+//    writer.write_byte(b'H');
+//    writer.write_string("ello ");
+//    writer.write_string("Wörld!");
+//    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
+//}
