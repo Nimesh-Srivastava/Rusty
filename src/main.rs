@@ -17,7 +17,10 @@ pub extern "C" fn _start() -> ! {
     test_main();
 
     println!("It did not crash");
-    loop{}
+    loop{
+        use rusty::print;
+        print!("-");
+    }
 }
 
 #[cfg(not(test))]
