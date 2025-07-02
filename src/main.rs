@@ -14,9 +14,9 @@ use alloc::boxed::Box;
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use rusty::memory;
-    use rusty::memory::BootInfoFrameAllocator;
-    use x86_64::{structures::paging::Page, VirtAddr};
+    use rusty::allocator;
+    use rusty::memory::{self, BootInfoFrameAllocator};
+    use x86_64::VirtAddr;
 
     println!("Hello world{}", "!");
     rusty::init();
@@ -24,6 +24,8 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
     let x = Box::new(41);
 
